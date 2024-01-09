@@ -10,6 +10,6 @@
     "VARIABLE_OVERRIDE_LOCATION": "See Function App Configuration Key-Values Settings Panel"
   },
   "ConnectionStrings": {
-    "nonprod-cert": "AuthType=Certificate; ClientId=68b9c81a-4f31-46b3-a290-e907ae7f9d06; Thumbprint=2A5DCD9B190F0C5C4C9E77EED3193BB08B176DA1; Url=https://nonprod-api.pas.standard.com"
+    "nonprod-cert": "AuthType=Certificate; ClientId=...; Thumbprint=...; Url=..."
   }
 }

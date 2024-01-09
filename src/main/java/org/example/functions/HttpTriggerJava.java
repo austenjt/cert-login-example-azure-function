@@ -3,11 +3,15 @@ package org.example.functions;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -96,13 +100,26 @@ public class HttpTriggerJava {
             ks.load(null, ("").toCharArray());
 
             Certificate cert = ks.getCertificate("nonprod-api.pas.standard.com");
-            result.put("encoded cert", Arrays.toString(cert.getEncoded()));
+            PublicKey publicKey = cert.getPublicKey();
+            result.put("cert hex", bytesToHex(cert.getEncoded()));
 
             PrivateKey privKey = (PrivateKey) ks.getKey("nonprod-api.pas.standard.com", ("").toCharArray());
             result.put("key algorithm", privKey.getAlgorithm());
             result.put("key format", privKey.getFormat());
             result.put("key asString", privKey.toString());
-        } catch (UnrecoverableKeyException | KeyStoreException | CertificateException | IOException | NoSuchAlgorithmException e) {
+
+            // try to validate cert
+            Signature signature = Signature.getInstance("SHA256withRSA");
+            signature.initSign(privKey);
+            byte[] data = "Test Data".getBytes();
+            signature.update(data);
+            byte[] digitalSignature = signature.sign();
+            signature.initVerify(publicKey);
+            signature.update(data);
+            boolean isValid = signature.verify(digitalSignature);
+            result.put("validated", isValid);
+        } catch (SignatureException | InvalidKeyException | UnrecoverableKeyException | KeyStoreException |
+                 CertificateException | IOException | NoSuchAlgorithmException e) {
             log.error("Error occurred loading the certificate.");
             throw new KeyStoreException("Error occurred loading the certificate.", e);
         }

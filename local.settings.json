@@ -7,6 +7,7 @@
     "AZURE_CLIENT_ID": "",
     "AZURE_CLIENT_SECRET": "",
     "SIC_CERT_PASS": "",
+    "WEBSITE_LOAD_CERTIFICATES": "thumbprint here",
     "VARIABLE_OVERRIDE_LOCATION": "See Function App Configuration Key-Values Settings Panel"
   },
   "ConnectionStrings": {

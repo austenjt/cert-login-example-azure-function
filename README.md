@@ -6,3 +6,13 @@ https://www.youtube.com/watch?v=26WGUCQ_LAI&t=625s
 
 ## Other Info
 
+Info page:
+
+https://learn.microsoft.com/en-us/azure/app-service/configure-ssl-certificate-in-code
+
+Where Azure function apps store certs:
+
+https://learn.microsoft.com/en-us/azure/app-service/configure-ssl-certificate-in-code#load-certificate-in-linuxwindows-containers
+
+
+

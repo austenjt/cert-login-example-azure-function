@@ -1,8 +1,6 @@
 package org.example.functions;
 
-import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
@@ -70,10 +68,10 @@ public class HttpTriggerJava {
         try {
 
 
-            String hexData = "";
+            Map<String, Object> hexData;
             //String hexData = downloadSecretAsHex();
             //String hexData = downloadCertificateAsHex();
-            hexData = downloadCertFromFunctionApp();
+            hexData = loadCertFromFunctionApp();
 
             return request.createResponseBuilder(HttpStatus.ACCEPTED)
                 .header("Access-Control-Allow-Origin", "*")
@@ -91,17 +89,19 @@ public class HttpTriggerJava {
         }
     }
 
-    public static String downloadCertFromFunctionApp() throws KeyStoreException {
-        final DefaultAzureCredential azureCredential = new DefaultAzureCredentialBuilder()
-            .build();
-        String result;
+    public static Map<String, Object> loadCertFromFunctionApp() throws KeyStoreException {
+        Map<String, Object> result = new HashMap<>();
         try {
             KeyStore ks = KeyStore.getInstance("Windows-MY");
             ks.load(null, ("").toCharArray());
-            Certificate cert = ks.getCertificate("nonprod-api.pas.standard.com");
-            PrivateKey privKey = (PrivateKey) ks.getKey("nonprod-api.pas.standard.com", ("").toCharArray());
 
-            result = privKey.toString();
+            Certificate cert = ks.getCertificate("nonprod-api.pas.standard.com");
+            result.put("encoded cert", Arrays.toString(cert.getEncoded()));
+
+            PrivateKey privKey = (PrivateKey) ks.getKey("nonprod-api.pas.standard.com", ("").toCharArray());
+            result.put("key algorithm", privKey.getAlgorithm());
+            result.put("key format", privKey.getFormat());
+            result.put("key asString", privKey.toString());
         } catch (UnrecoverableKeyException | KeyStoreException | CertificateException | IOException | NoSuchAlgorithmException e) {
             log.error("Error occurred loading the certificate.");
             throw new KeyStoreException("Error occurred loading the certificate.", e);
@@ -109,6 +109,7 @@ public class HttpTriggerJava {
       return result;
     }
 
+    @Deprecated()
     public static String downloadSecretAsHex() {
         final DefaultAzureCredential azureCredential = new DefaultAzureCredentialBuilder()
             .build();
@@ -124,6 +125,7 @@ public class HttpTriggerJava {
         return bytesToHex(secretValue.getBytes(StandardCharsets.UTF_8));
     }
 
+    @Deprecated()
     public static String downloadCertificateAsHex() {
 
         final DefaultAzureCredential azureCredential = new DefaultAzureCredentialBuilder()

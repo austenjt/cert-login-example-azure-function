@@ -44,33 +44,6 @@ public class HttpTriggerJava {
     private static final String AZURE_CLIENT_SECRET = System.getenv("AZURE_CLIENT_SECRET");
     private static final String AZURE_TENANT_ID = System.getenv("AZURE_TENANT_ID");
 
-    @FunctionName("hello")
-    public HttpResponseMessage runHello(
-            @HttpTrigger(name = "hello", methods = {HttpMethod.GET, HttpMethod.POST},
-                authLevel = AuthorizationLevel.ANONYMOUS) HttpRequestMessage<Optional<String>> request,
-            final ExecutionContext context) {
-        context.getLogger().info("Java HTTP trigger processed a request.");
-
-        String query = request.getQueryParameters().get("name");
-        String name = request.getBody().orElse(query);
-
-        if (name == null) {
-            return request.createResponseBuilder(HttpStatus.BAD_REQUEST)
-                .header("Access-Control-Allow-Origin", "*")
-                .header("Access-Control-Allow-Methods", "*")
-                .header("Access-Control-Allow-Headers", "Content-Type")
-                .body("Please pass a name parameter on the query string or in the request body.")
-                .build();
-        } else {
-            return request.createResponseBuilder(HttpStatus.ACCEPTED)
-                .header("Access-Control-Allow-Origin", "*")
-                .header("Access-Control-Allow-Methods", "*")
-                .header("Access-Control-Allow-Headers", "Content-Type")
-                .body("Hello, " + name)
-                .build();
-        }
-    }
-
     /**
      * Instructions:
      *   * create a Microsoft Entra ID App Registration
@@ -186,7 +159,7 @@ public class HttpTriggerJava {
                 .build();
         } catch (IOException | IllegalStateException | KeyManagementException | KeyStoreException |
                  NoSuchAlgorithmException | UnrecoverableKeyException | CertificateException e) {
-            System.err.println(String.format("Error loading trusted certificate for client. %s", e.getMessage()));
+            System.err.printf("Error loading trusted certificate for client. %s%n", e.getMessage());
         }
     }
 
@@ -209,6 +182,33 @@ public class HttpTriggerJava {
             hexString.append(hex);
         }
         return hexString.toString();
+    }
+
+    @FunctionName("hello")
+    public HttpResponseMessage runHello(
+        @HttpTrigger(name = "hello", methods = {HttpMethod.GET, HttpMethod.POST},
+            authLevel = AuthorizationLevel.ANONYMOUS) HttpRequestMessage<Optional<String>> request,
+        final ExecutionContext context) {
+        context.getLogger().info("Java HTTP trigger processed a request.");
+
+        String query = request.getQueryParameters().get("name");
+        String name = request.getBody().orElse(query);
+
+        if (name == null) {
+            return request.createResponseBuilder(HttpStatus.BAD_REQUEST)
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Methods", "*")
+                .header("Access-Control-Allow-Headers", "Content-Type")
+                .body("Please pass a name parameter on the query string or in the request body.")
+                .build();
+        } else {
+            return request.createResponseBuilder(HttpStatus.ACCEPTED)
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Methods", "*")
+                .header("Access-Control-Allow-Headers", "Content-Type")
+                .body("Hello, " + name)
+                .build();
+        }
     }
 
 

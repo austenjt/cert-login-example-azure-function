@@ -9,7 +9,9 @@ import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.UnrecoverableKeyException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.time.Duration;
 import java.util.*;
@@ -24,6 +26,7 @@ import com.azure.security.keyvault.secrets.SecretClientBuilder;
 import com.azure.security.keyvault.secrets.models.KeyVaultSecret;
 import com.microsoft.azure.functions.annotation.*;
 import com.microsoft.azure.functions.*;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 
 import javax.net.ssl.KeyManagerFactory;
@@ -33,6 +36,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+@Slf4j
 public class HttpTriggerJava {
 
     // CERT has been uploaded to function app certificate storage
@@ -87,15 +91,22 @@ public class HttpTriggerJava {
         }
     }
 
-
-
-
-    public static String downloadCertFromFunctionApp() {
+    public static String downloadCertFromFunctionApp() throws KeyStoreException {
         final DefaultAzureCredential azureCredential = new DefaultAzureCredentialBuilder()
             .build();
+        String result;
+        try {
+            KeyStore ks = KeyStore.getInstance("Windows-MY");
+            ks.load(null, ("").toCharArray());
+            Certificate cert = ks.getCertificate("nonprod-api.pas.standard.com");
+            PrivateKey privKey = (PrivateKey) ks.getKey("nonprod-api.pas.standard.com", ("").toCharArray());
 
-
-        return "";
+            result = privKey.toString();
+        } catch (UnrecoverableKeyException | KeyStoreException | CertificateException | IOException | NoSuchAlgorithmException e) {
+            log.error("Error occurred loading the certificate.");
+            throw new KeyStoreException("Error occurred loading the certificate.", e);
+        }
+      return result;
     }
 
     public static String downloadSecretAsHex() {
